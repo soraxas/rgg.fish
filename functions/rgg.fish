@@ -15,7 +15,7 @@ complete -c vv -x -n '__fish_use_subcommand' -a "(__vv_list_complete)"
 
 # it's ok to define vv here because vv won't work without at least running rgg once
 function vv
-    if not set -q __rgg_prev_stored_fnames[1]; or not set -q __rgg_prev_stored_lnumbers[1]
+    if not set -q __rgg_prev_stored_fnames; or not set -q __rgg_prev_stored_lnumbers
         echo "Variables are empty or not set. Have you ran `rgg` yet?"
         return 1
     end
@@ -23,6 +23,11 @@ function vv
     if set -q -- $argv[1]  # no argunment
         printf 'Usage: vv [FILE_NUMBER[-LINE_NUMBER]]\n'
         printf '\n'
+        if not set -q __rgg_prev_stored_fnames[1]; or not set -q __rgg_prev_stored_lnumbers[1]
+            echo "Previous rg search has no search results."
+            return 
+        end
+
         printf 'Previously stored search results:\n'
         printf '[Arg]\t[LinesNum]\t[Filename]\n'
 
