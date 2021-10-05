@@ -89,13 +89,15 @@ function rgg
         while read -l line
             # strip ANSI colour code
             set -l stripped_line (string replace -ra '\e\[[^m]*m' '' $line)
+            # hacky match using output colour
+
+            set -l is_fname
+            if string match -rq '^\e\[0m\e\[35m' $line  # hacky way to use colour sequence to determine line type
+              set is_fname true
+            end
 
             set -l lnumber (string match -r '^[0-9]+' $stripped_line)
-            if test -n "$lnumber"
-                # line numbers
-                set -a tmp_lnumbers_list $lnumber
-                printf '%s-' $fname_color_num
-            else if string match -q -r '^\S+' $stripped_line
+            if test -n "$is_fname" #|| string match -q -r '^\S+' $stripped_line
                 # filename
                 __rgg_save_line_numbers
                 set -a __rgg_prev_stored_fnames $stripped_line
@@ -103,6 +105,10 @@ function rgg
                 set -g tmp_lnumbers_list
                 set fname_color_num (set_color cyan)(count $__rgg_prev_stored_fnames)(set_color normal)
                 printf (set_color red)'[%s'(set_color red)']'(set_color normal)': ' $fname_color_num
+            else if test -n "$lnumber"
+                # line numbers
+                set -a tmp_lnumbers_list $lnumber
+                printf '%s-' $fname_color_num
             # else
             #     # empty line
             #     echo -- ____ $line
@@ -114,7 +120,16 @@ function rgg
         set -e fname_color_num
     end
 
-    command rg --line-buffered --heading --line-number --color always $argv | __rgg_process_line
+    set rg_args --line-buffered --heading --line-number --color always $argv
+
+    if command -q rga
+      rga $rg_args | __rgg_process_line
+    else if command -q rga
+      rg $rg_args | __rgg_process_line
+    else
+      echo "No rg installed! (ripgrep)" 1>&2
+      return 1
+    end
 
     return
 end
