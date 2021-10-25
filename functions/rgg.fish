@@ -124,7 +124,7 @@ function rgg
 
     if command -q rga
       rga $rg_args | __rgg_process_line
-    else if command -q rga
+    else if command -q rg
       rg $rg_args | __rgg_process_line
     else
       echo "No rg installed! (ripgrep)" 1>&2
