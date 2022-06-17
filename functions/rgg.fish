@@ -120,9 +120,20 @@ function rgg
         set -e fname_color_num
     end
 
-    set rg_args --line-buffered --heading --line-number --color always $argv
+    # remove argunment that is specific to rgg, and passthrough the rest
+    set -l argv_passthrough
+    for i in (seq 1 (count $argv))
+      switch $argv[$i]
+        case '--no-rga'
+          set __norga true
+        case '*'
+          set -a argv_passthrough $argv[$i]
+      end
+    end
 
-    if command -q rga
+    set rg_args --line-buffered --heading --line-number --color always $argv_passthrough
+
+    if command -q rga; and test -z "$__norga"
       rga $rg_args | __rgg_process_line
     else if command -q rg
       rg $rg_args | __rgg_process_line
