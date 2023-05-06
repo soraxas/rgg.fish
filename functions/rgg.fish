@@ -5,7 +5,7 @@ function __vv_list_complete
         set -l -- fname $__rgg_prev_stored_fnames[$i]
         set -l -- lnumbers (string split -- '\n' $__rgg_prev_stored_lnumbers[$i])
         for lnum in $lnumbers
-            printf -- "$i-$lnum\t%s\n" $fname
+            printf "%s-%s\t%s\n" "$i" "$lnum" $fname
         end
     end
 end
